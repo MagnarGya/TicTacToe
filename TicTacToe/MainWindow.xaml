@@ -10,9 +10,9 @@
         <Border BorderThickness="2" Background="AliceBlue">
             <StackPanel Name="Menu" Orientation="Horizontal">
                 <Button Margin="1,1,1,1" Click="Button_NewGame">New Game</Button>
-                <Button Margin="1,1,1,1">Settings</Button>
+                <Button Margin="1,1,1,1" Click="Button_Settings">Settings</Button>
             </StackPanel>
         </Border>
-        <Grid Name="Game"></Grid>
+        <Grid Name="GameGrid"></Grid>
     </StackPanel>
 </Window>

@@ -21,14 +21,16 @@ namespace TicTacToe
     public partial class MainWindow : Window
     {
         Game game;
+        int gamesize;
         Button[] buttons;
         int playermax;
+        int currentplayermax;
         int currentplayer;
 
         public MainWindow()
         {
             InitializeComponent();
-            game = new Game(3);
+            gamesize = 3;
             playermax = 2;
             currentplayer = 0;
             NewGame();
@@ -36,8 +38,11 @@ namespace TicTacToe
 
         public void NewGame()
         {
+            game = new Game(gamesize);
+            currentplayermax = playermax;
+            currentplayer = 0;
             buttons = new Button[game.Size * game.Size];
-            Grid grid = (Grid)this.FindName("Game");
+            Grid grid = this.GameGrid;
             grid.VerticalAlignment = VerticalAlignment.Stretch;
             grid.Children.Clear();
             grid.ColumnDefinitions.Clear();
@@ -66,6 +71,7 @@ namespace TicTacToe
                 Grid.SetColumn(buttons[i], (i % game.Size));
                 grid.Children.Add(buttons[i]);
             }
+            RenderButtons();
         }
 
 
@@ -73,7 +79,7 @@ namespace TicTacToe
         {
             Button button = (Button)sender;
             button.Content = currentplayer;
-            currentplayer = (currentplayer + 1) % playermax;
+            currentplayer = (currentplayer + 1) % currentplayermax;
             button.IsEnabled = false;
             checkGame();
         }
@@ -120,7 +126,7 @@ namespace TicTacToe
             //Checks Cross for winning condition
             for(int i = 1; i < game.Size; i++)
             {
-                if (buttons[game.Size * (i - 1) + (i - 1)].Content.Equals(buttons[game.Size * i + i]) && !buttons[game.Size * i + i].Content.Equals("-"))
+                if (buttons[game.Size * (i - 1) + (i - 1)].Content.Equals(buttons[game.Size * i + i].Content) && !buttons[game.Size * i + i].Content.Equals("-"))
                 {
                     match++;
                 }
@@ -132,19 +138,52 @@ namespace TicTacToe
             match = 0;
             for(int i = 2; i < game.Size+1; i++)
             {
-                if(buttons[game.Size * (i-1) - (i-1)].Content.Equals(buttons[game.Size * i - i]) && !buttons[game.Size * i - i].Content.Equals("-"))
+                if(buttons[game.Size * (i-1) - (i-1)].Content.Equals(buttons[game.Size * i - i].Content) && !buttons[game.Size * i - i].Content.Equals("-"))
                 {
                     match++;
                 }
             }
-
+            if (match == game.Size - 1)
+            {
+                gameOver = true;
+            }
 
             if (gameOver)
             {
-                for(int i = 0; i < buttons.Length; i++)
-                {
-                    buttons[i].IsEnabled = false;
-                }
+                GameOver();
+            }
+        }
+
+        void GameOver()
+        {
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                buttons[i].IsEnabled = false;
+            }
+            GameOver go = new GameOver((currentplayer + currentplayermax - 1) % currentplayermax);
+            go.ShowDialog();
+        }
+
+        void Button_Settings(Object sender, RoutedEventArgs e)
+        {
+            Settings sd = new Settings(game.Size, currentplayermax, (int)this.Width, (int)this.Height, ChangeSettings);
+            sd.ShowDialog();
+        }
+
+        void ChangeSettings(int _gamesize, int _playercount, int _width, int _height)
+        {
+            gamesize = _gamesize;
+            playermax = _playercount;
+            this.Width = _width;
+            this.Height = _height;
+            RenderButtons();
+        }
+
+        void RenderButtons()
+        {
+            foreach(RowDefinition row in this.GameGrid.RowDefinitions)
+            {
+                row.Height = new GridLength ((this.Height-65) / game.Size);
             }
         }
 
